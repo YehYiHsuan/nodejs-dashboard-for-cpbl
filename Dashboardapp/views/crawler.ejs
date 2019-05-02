@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title><%= title %></title>
+	<link href='/stylesheets/style.css' rel='stylesheet'>
+</head>
+<body>
+	<h1><%= subtitle %></h1>
+    <!--個人成績用表格-->
+	<table>
+		<%if(typeof col !== 'undefined'){%>
+            <tr>
+            <%col.forEach(function(eachcol){%>
+			    <th><%=eachcol%></th>
+            <%})%>
+            </tr>
+            <%data.forEach(function(eachperson){%>
+		        <tr>
+			    <%Object.keys(eachperson).forEach(function(key){%>
+			        <td><%=eachperson[key]%></td>
+                <%})%>
+		        </tr>
+            <%})}%>
+	</table>
+
+    <!--團隊成績用表格-->
+    <%if(typeof cols !== 'undefined'){
+	   for(var i=0;i<cols.length;i++){%>
+	<table>
+        <tr>
+		<%for(var c=0;c<cols[i].length;c++){%>
+			<th><%=cols[i][c]%></th>
+        <%}%>
+        </tr>
+            <%if(typeof datas !== 'undefined'){
+                for(var r=0;r<datas[i].length;r++){%>
+		            <tr>
+			        <%Object.keys(datas[i][r]).forEach(function(key){%>
+			            <td><%=datas[i][r][key]%></td>
+                    <%})%>
+		            </tr>
+                <%}%>
+	</table>
+            <%}%>
+        <%}%>
+    <%}%>
+</body>
+</html>
