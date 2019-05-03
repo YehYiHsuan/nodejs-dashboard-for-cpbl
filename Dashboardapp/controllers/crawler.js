@@ -1,5 +1,6 @@
 var request = require("request");
 var cheerio = require("cheerio");
+
 /*抓取野手成績 */
 exports.FetchBattingStat = function(req, res) {
 	var result = [];
@@ -57,6 +58,7 @@ exports.FetchBattingStat = function(req, res) {
 		});
 	});
 };
+
 /*抓取投手成績 */
 exports.FetchPitchingStat = function(req, res) {
 	var result = [];
@@ -114,6 +116,7 @@ exports.FetchPitchingStat = function(req, res) {
 		});
 	});
 };
+
 /*抓取團隊成績 */
 exports.FetchTeamStat = function(req, res) {
 	var results = [];
@@ -151,6 +154,68 @@ exports.FetchTeamStat = function(req, res) {
 			}
 			results.push(result);
 		}
+		res.render('crawler', {
+			title: 'BaseBall Statistics',
+			subtitle: 'Team Statistics',
+			cols: colname,
+			datas: results
+		});
+	});
+};
+
+/*抓取逐場成績 */
+exports.FetchDailyStat = function(req, res) {
+	var results = [];
+	var colname = [];
+	request({
+		url: "http://www.cpbl.com.tw/schedule/index/2019-4-01.html?&date=2019-4-01&gameno=01&sfieldsub=&sgameno=01",
+		method: "GET"
+	}, function(e, r, b) {
+		if (e || !b) {
+			return;
+		}
+		var $ = cheerio.load(b);
+		//var result = [];
+	    var games=[];
+		$(".one_block").each(function(i,e){
+            var gamelink = $(e).attr('onclick');
+            if(typeof gamelink !== 'undefined'){
+                var date = gamelink.match(/\d{4}-\d{2}-\d{2}/g)[0];
+                var gameid=gamelink.match(/game_id\=\d+/g)[0].match(/\d+/g)[0];
+                var teamname=[];
+                var scores=[];
+                var infos=$(e).find('.schedule_info');
+                //console.log(infos);
+                $(e).find('.schedule_team').each(function(i,el){
+                    var team_img=$(el).find('img');
+                        for(var i=0;i<team_img.length;i++){
+                            var teamlink=team_img[i].attribs.src;
+
+                             if (teamlink.includes("B04")) {
+                            teamname.push("Fubon");
+                            } else if (teamlink.includes("L01")) {
+                            teamname.push("Uni");
+                            } else if (teamlink.includes("A02")) {
+                            teamname.push("Lamigo");
+                            } else if (teamlink.includes("E02")) {
+                            teamname.push("Brothers");
+                            }
+                        }
+                })
+                    infos.find('.schedule_score').each(function(ii,el){
+                        scores.push($(el).text());
+                    })
+                    for(var n=0;n<teamname.length;n++){
+                    var game={};
+                    game["date"]=date;
+                    game["no"]=game_id;
+                    game["team"]=teamname[n];
+                    game["score"]=scores[n];
+                    games.push(game);
+                    }
+            }
+        })
+
 		res.render('crawler', {
 			title: 'BaseBall Statistics',
 			subtitle: 'Team Statistics',
